@@ -113,11 +113,13 @@ Examples
 Configuration file variables
 ----------------------------
 
-H       | Hubble constant in km/s/Mpc, default value 70
-Om      | Matter density (Flat cosmology is assumed, so that Dark Energy density = 1-Om), default value 0.27  
-Eband   | X-ray energy band in eV, default value [500,5000]
-R_bkgr  | Annnulus to extract background level, in units of R500, default value [2,4]
-annuli  | Annuli for computing Aphot, default value [0.05, 0.12, 0.2, 0.3, 1.0]
+Variable | Meaning
+---------|--------
+H        | Hubble constant in km/s/Mpc, default value 70
+Om       | Matter density (Flat cosmology is assumed, so that Dark Energy density = 1-Om), default value 0.27  
+Eband    | X-ray energy band in eV, default value [500,5000]
+R_bkgr   | Annnulus to extract background level, in units of R500, default value [2,4]
+annuli   | Annuli for computing Aphot, default value [0.05, 0.12, 0.2, 0.3, 1.0]
 Nresamplings |   Number of Monte-Carlo iterations for uncertainty estimation. If 0, uncertainty is not computed. Default value is 100
 
 
