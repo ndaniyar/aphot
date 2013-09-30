@@ -4,14 +4,18 @@ A_phot computing library
 About
 -----
   * This is a library for computing Photon Asymmetry (A_phot)
-    parameter for morphological classification of cluster.
+    parameter for morphological classification of clusters.
     This parameter is described in detail in the following publication:
     
-        xxxxxxxx
+        D. Nurgaliev, M. McDonald, B. A. Benson, C. W. Stubbs, A. Vikhlinin
+        Robust Quantification of Galaxy Cluster Morphology Using Asymmetry and Central Concentration
+        arXiv:1309.7044
 
   * This program is free software: you can redistribute it, modify
-    it or unclude parts of it in your free or proprietary software, provided
+    it or include parts of it in your free or proprietary software, provided
     that you reference the aforementioned scientific publication.
+    
+This software is freely available, but we expect that all publications describing work using this software, or all commercial products using it, quote at least one of the references given below. This software is released under the BSD License
 
   * Copyright (C) 2013 Daniyar Nurgaliev
 
@@ -19,7 +23,7 @@ About
 
 Prerequisites
 -------------
-  * Python 2.4+ (TODO: Check if it works on 2.4)
+  * Python 2.4+ 
   * Installed numpy, scipy and pyfits packages 
 
 
