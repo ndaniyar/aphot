@@ -74,7 +74,7 @@ def get_expm_funcs(expm, offset, bins, rads):
         exposure of all pixels integrated in a sector of polar angles from 0 to angle
         in each annulus
     '''
-    ye, xe = indices(expm.shape) 
+    ye, xe = indices(expm.shape, dtype=float) 
     xc = xe.ravel() * bins - offset.x
     yc = ye.ravel() * bins - offset.y
     r2_all = xc**2 + yc**2
@@ -82,10 +82,10 @@ def get_expm_funcs(expm, offset, bins, rads):
     expm_funcs = []
     for i in range(len(rads)-1):
         minrad, maxrad = rads[i], rads[i+1]
-        inside = (r2_all > (minrad - bins/2)**2) & (r2_all < (maxrad + bins/2)**2) 
+        inside = (r2_all > (minrad - bins/2.0)**2) & (r2_all < (maxrad + bins/2.0)**2) 
 
         r = sqrt(r2_all[inside])
-        phi = arctan2(yc[inside], xc[inside])/2/pi + 0.5
+        phi = arctan2(yc[inside], xc[inside])/2.0/pi + 0.5
         dphi = 8/2/pi/r
         
         a = phi - dphi
@@ -100,7 +100,7 @@ def get_expm_funcs(expm, offset, bins, rads):
         b[b_greater_1] -= 1
         angles = hstack([0, a, b, 1])
 
-        h = expm.flat[inside] * (minimum(r + bins/2, maxrad) - maximum(r - bins/2, minrad))
+        h = expm.flat[inside] * (minimum(r + bins/2.0, maxrad) - maximum(r - bins/2.0, minrad))
         zero_dens = sum(h[crosses_zero])
         ddens = hstack([zero_dens, sign*h, -sign*h, -zero_dens])
 
