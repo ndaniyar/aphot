@@ -95,6 +95,6 @@ if p.Nresamplings > 0:
     mid = scoreatpercentile(ap, 50)
     hi  = scoreatpercentile(ap, 84)
 
-    #print '\nAphot =', ap0.aphot, '+', (mid-lo)/1.4142, '-', (hi-mid)/1.4142 
-
-    print p.name, ap0.aphot, (mid-lo)/1.4142, (hi-mid)/1.4142 
+    print '\nAphot =', ap0.aphot, '+', (mid-lo)/1.4142, '-', (hi-mid)/1.4142 
+else:
+    print '\nAphot =', ap0.aphot
