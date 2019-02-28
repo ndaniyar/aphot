@@ -41,7 +41,7 @@ Examples
   * Calculating A_phot given event 2 file, exposure map and point sources file:
 
         cd examples/SPT-CLJ0352-5647/
-        python ../../aphot.py --evt_files=13490.evt.fits --exp_files=13490.exp.fits --reg_files=13490.psf.reg --ra=28.172 --dec=-13.970 --z=0.833 --R500=811.7
+        python ../../aphot.py --evt_files=13490.evt.fits --exp_files=13490.exp.fits --reg_files=13490.psf.reg --ra=58.2412 --dec=-56.7985 --z=0.683 --R500=875.7
 
     Here "evt_files", "exp_files" and "reg_files" set the paths to Chandra level 2 event file, 
     "ra" and "dec" are the coordinates of the cluster, "z" and "R500" are cluster redshift and radius 
@@ -50,7 +50,7 @@ Examples
 
   * Exposure maps and/or point sources can be omitted:
 
-        python ../../aphot.py --evt_files=13490.evt.fits --ra=28.172 --dec=-13.970 --z=0.833 --R500=811.7
+        python ../../aphot.py --evt_files=13490.evt.fits --ra=58.2412 --dec=-56.7985 --z=0.683 --R500=875.7
 
     In this case the program assumes uniform illumination of the chip, and uses an 
     internal ad-hoc routine for identifying point sources to be excluded from the image. This way of

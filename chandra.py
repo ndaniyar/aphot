@@ -13,7 +13,8 @@
 
 
 from scipy.misc import imsave
-import pyfits
+import numpy as np 
+import astropy.io.fits
 from common import *
 
 
@@ -71,7 +72,6 @@ def read_regions(filename, header):
         x = int(round(x))
         y = int(round(y))
         regions += [Ellipse(x,y,a,b,theta)]
-
     return regions
 
 
@@ -90,6 +90,7 @@ def mask_regions(mask, regions, offset):
         if xr < 0: xr = 0
         if yl < 0: yl = 0
         if yr < 0: yr = 0
+        yl,yr,xl,xr = int(yl), int(yr), int(xl), int(xr) 
         mask[yl:yr, xl:xr] &= ~ellipsemask(xc, yc, a, b, th)(y_ind[yl:yr,xl:xr], x_ind[yl:yr,xl:xr])
 
 
@@ -101,7 +102,7 @@ def generate_uniform_exposure_map(evt_file):
         c = cos(alpha/180*pi)
         return x*c - y*s, x*s + y*c
     
-    hdu = pyfits.open(evt_file)
+    hdu = astropy.io.fits.open(evt_file) 
     data = hdu[1].data
     header = hdu[1].header
     
@@ -149,37 +150,21 @@ def get_events_expmap(evt, exph, expm, regions, ths, R_bkgr_px, inspect=False):
         Saves aligned images in a .png with a prefix given in inspect
     '''
     # Load chandra events
-    #hdu = pyfits.open(evt_file)
-    #evth = hdu[1].header 
-    #data = hdu[1].data
-    #u = (Eband[0]<data.energy) & (data.energy<Eband[1])
-    #evt = sdict(x = data.x[u], y = data.y[u])
-    #center = radec2xy_winding(ra, dec, evth) # cluster center in evt coordinates
-
     center = evt.center
-    # Load exposure maps
-    #hdu = pyfits.open(exp_file)
-    #exph = hdu[0].header
-    #expm = hdu[0].data
     CCD = expm > expm.max()/5
     expm[~CCD] = 0
-    #if expm_norm is None: 
     expm_norm = mean(expm[CCD])
-    #expm /= expm_norm
+
 
     bins = int(round(exph['CDELT1']/evt.header['TCDLT11']))
     binpx = ones((bins,bins), dtype=bool) 
     # Subtract offset to convert evt coordinates to exp coordinates 
     offset = -radec2xy_winding(*xy2radec(0, 0, evt.header), h=exph) * bins
-    #offset = XY(evt.header['TCRPX11']-0.5 - (exph['CRPIX1']-0.5)*bins + 1,
-    #            evt.header['TCRPX12']-0.5 - (exph['CRPIX2']-0.5)*bins + 1)
     evt.y_expm = intround(evt.y - offset.y)
     evt.x_expm = intround(evt.x - offset.x)
-    #print offset
 
     # Mask point sources
     ptsrc_mask = kron(ones_like(expm, dtype=bool), binpx)
-    #mask_regions(ptsrc_mask, read_regions(psf_file, evt.header))
     mask_regions(ptsrc_mask, regions, offset)
 
     # Find borders
@@ -196,7 +181,6 @@ def get_events_expmap(evt, exph, expm, regions, ths, R_bkgr_px, inspect=False):
     x = arange(xlb, xrb)
     y = arange(ylb, yrb)
     rad2 = outer(ones_like(y),(x-center.x)**2) + outer((y-center.y)**2,ones_like(x))
-    #r = array(R_bkgr) * R500px
     bkgr_mask[ylb:yrb, xlb:xrb] &= (R_bkgr_px[0]**2 < rad2) & (rad2 < R_bkgr_px[1]**2) 
     del rad2
 
@@ -220,6 +204,7 @@ def get_events_expmap(evt, exph, expm, regions, ths, R_bkgr_px, inspect=False):
     evt.x_expm = evt.x_expm[u]
     evt.y_expm = evt.y_expm[u]
     tmp = expm[intround((evt.y-offset.y)/bins), intround((evt.x-offset.x)/bins)]
+
     # Exclude off-chip counts
     u = (tmp > 0)
     evt.x = evt.x[u]
@@ -229,7 +214,6 @@ def get_events_expmap(evt, exph, expm, regions, ths, R_bkgr_px, inspect=False):
     # Asymmetry background
     bkgr_counts = sum(bkgr_mask[evt.y_expm, evt.x_expm])
     bkgr_exp = sum(kron(expm, binpx)[ptsrc_mask & bkgr_mask])
-    #bkgr_asym = bkgr_counts / bkgr_exp
     
     # Power ratios background
     #bkgr_flux = sum(1./evt.w)
@@ -248,25 +232,21 @@ def get_events_expmap(evt, exph, expm, regions, ths, R_bkgr_px, inspect=False):
     evt.yc = evt.yc[u]
     evt.w = evt.w[u]
     evt += sdict(bkgr_counts = bkgr_counts, bkgr_exp = bkgr_exp) 
-    #evt += sdict( bkgr_asym = bkgr_asym, bkgr_pr = bkgr_pr, bkgr = bkgr_asym,
-    #              expm_norm = expm_norm, bkgr_counts = bkgr_counts,
-    #              bkgr_exp = bkgr_exp, bkgr_flux = bkgr_flux, bkgr_area = bkgr_area )
 
     # Cut expm
     xl = round((-ths+center.x-offset.x)/bins)
     yl = round((-ths+center.y-offset.y)/bins)
     xr = xl + round(2.*ths/bins) + 1
     yr = yl + round(2.*ths/bins) + 1
+    yl,yr,xl,xr = int(yl), int(yr), int(xl), int(xr) 
+
+
     expm = expm[yl:yr, xl:xr]
     tmp = ptsrc_mask[yl*bins:yr*bins, xl*bins:xr*bins].astype(int)
     ptsrc_exp = sum(sum(tmp.reshape(yr-yl, bins, xr-xl, bins), 3), 1)
-    #ptsrc_exp = zeros_like(expm)
-    #for sx in range(bins):
-    #    for sy in range(bins):
-    #        ptsrc_exp += ptsrc_mask[yl*bins+sy:(yr+1)*bins+sy:bins, 
-    #                                xl*bins+sx:(xr+1)*bins+sx:bins]
     expm *= ptsrc_exp
-    expm /= bins**2
+    expm = expm/(bins**2) 
+
 
     ofs = center - offset - bins*arr(xl, yl)
     cl_expm = sdict(map = expm, ofs = ofs, bins=bins, norm = expm_norm)
@@ -276,7 +256,7 @@ def get_events_expmap(evt, exph, expm, regions, ths, R_bkgr_px, inspect=False):
 
 def load_evt_file(evt_file, ra, dec, Eband, evt=None):
     # Load chandra events
-    hdu = pyfits.open(evt_file)
+    hdu = astropy.io.fits.open(evt_file)
     data = hdu[1].data
     header = hdu[1].header
 
@@ -302,13 +282,10 @@ def process_multiple_obs(ra, dec, ths, Eband, R_bkgr_px,
 
     if len(exp_files) == 1:
         # Get exposure map
-        hdu = pyfits.open(exp_files[0])
+        hdu = astropy.io.fits.open(exp_files[0]) 
         exph = hdu[0].header
         expm = hdu[0].data
-        #ref_header = exph
-        #bins = int(round(exph['CDELT1']/-0.000137))
-        #ref_header['CDELT1'] *= bins
-        #ref_header['CDELT2'] *= bins
+
 
         # Go through the event files in reverse, to remember the header of the
         # first file when done. The coordinate system defined in this header is
@@ -319,7 +296,7 @@ def process_multiple_obs(ra, dec, ths, Eband, R_bkgr_px,
 
         # get all regions
         if len(reg_files) == 0: # no reg files, try to identify point sources
-            print no_region_files
+            print (no_region_files)
             regions = find_point_sources(evt)
         else:
             regions = []
@@ -328,8 +305,9 @@ def process_multiple_obs(ra, dec, ths, Eband, R_bkgr_px,
 
         evt, expm = get_events_expmap(evt, exph, expm, regions, ths, R_bkgr_px, inspect)
         del evt.header
+
         expm.ofs = intround(expm.ofs)
-        evt.bkgr_exp /= expm.norm
+        evt.bkgr_exp = evt.bkgr_exp/expm.norm
 
     else:
         if len(exp_files) == 0: 
@@ -351,13 +329,13 @@ def process_multiple_obs(ra, dec, ths, Eband, R_bkgr_px,
             if exp_file is None:
                 exph, expm = generate_uniform_exposure_map(evt_file)
             else:
-                hdu = pyfits.open(path+exp_file)
+                hdu = astropy.io.fits.open(path+exp_file) 
                 exph = hdu[0].header
                 expm = hdu[0].data
 
             # Get next region file
             if reg_file is None:
-                print no_region_files
+                print (no_region_files)
                 regions = find_point_sources(evt)
             else:
                 regions = read_regions(path+reg_file, evt.header)
@@ -396,8 +374,7 @@ def process_multiple_obs(ra, dec, ths, Eband, R_bkgr_px,
     b = 102 # classify_events legacy
     evt += sdict(ths=ths, b=b, d=ths+b, ims=2*(ths+b))
     evt.bkgr = evt.bkgr_counts / evt.bkgr_exp
-    expm.map /= expm.norm
+    expm.map = expm.map/expm.norm 
     
-
     return evt, expm
 

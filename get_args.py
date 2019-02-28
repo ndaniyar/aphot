@@ -31,7 +31,10 @@ def get_args(**defaults):
     args = {}
     if cfg_file is not None: # Use cfg file
         args['cfg'] = cfg_file
-        execfile(cfg_file, args)
+        # execfile(cfg_file, args)
+        with open(cfg_file) as f:
+            code = compile(f.read(), cfg_file, 'exec')
+            exec(code, args)
         del args['__builtins__']
         # args in the cfg file is merged to the function argumet args
         # positional is overriden if it exists in cfg file

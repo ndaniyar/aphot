@@ -22,19 +22,19 @@ def interp_search_vec(x0, a, l_init=0, r_init=0):
     '''
     bad_left = (a[0] > x0)
     if any(bad_left):
-        print 'interp_search_vec error: not all(a[0] <= x0)'
-        print 'a =', a
-        print 'x0 =', x0
-        print 'bad indices:', where(bad_left)[0]
+        print ('interp_search_vec error: not all(a[0] <= x0)')
+        print ('a =', a)
+        print ('x0 =', x0)
+        print ('bad indices:', where(bad_left)[0])
         x0[bad_left] = a[0]
     #assert left
 
     bad_right = (x0 > a[-1])
     if any(bad_right):
-        print 'interp_search_vec error: not all(x0 <= a[-1])'
-        print 'a =', a
-        print 'x0 =', x0
-        print 'bad indices: ', bad_right
+        print ('interp_search_vec error: not all(x0 <= a[-1])')
+        print ('a =', a)
+        print ('x0 =', x0)
+        print ('bad indices: ', bad_right)
         x0[bad_right] == a[-1]
     #assert right
 
@@ -214,6 +214,7 @@ def aphot(evt, center, rads, expm=None, adaptive_annuli=0):
     phi = phi[sortind]
 
     maxrad_ind = interp_search_vec(arr(1.1*rads[-1]), r)
+    maxrad_ind = maxrad_ind[0]
     r = r[:maxrad_ind]
     phi = phi[:maxrad_ind]
 
@@ -230,6 +231,7 @@ def aphot(evt, center, rads, expm=None, adaptive_annuli=0):
         ann = interp_search_vec(rads, r)
 
     Nrings = len(rads)-1
+
     emdf = get_expm_funcs(expm.map, expm.ofs+center, expm.bins, rads) if expm is not None else [None]*Nrings
     wats, asym, tot_counts, cl_counts, weight, radweight = (zeros(Nrings) for _ in range(6))
     

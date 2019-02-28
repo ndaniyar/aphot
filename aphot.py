@@ -48,7 +48,7 @@ evt, expm = process_multiple_obs(p.ra, p.dec, int(1.5*R500px),
                     p.path, p.evt_files.split(), p.exp_files.split(), p.reg_files.split(),
                     p.inspect)
 
-#print 'Calculating Aphot ...'
+print ('Calculating Aphot ...')
 stdout.flush()
 
 # Find cluster core as the brightest point after convolution with
@@ -58,12 +58,7 @@ center = find_core(evt, 40*kpc2px, 400*kpc2px)
 # Calculate A_phot
 annuli_px = [x*R500px for x in p.annuli]
 ap0 = aphot(evt, center, annuli_px, expm=expm)
-#print 'Aphot =', 
-#print ap0
-#print annuli_px
-#print center
 
-#print p.name, ap0.aphot
 
 # Calculate uncertainty ###########################################3
 
@@ -82,10 +77,9 @@ def sample_half_counts(evt0, seed=0):
 
 
 if p.Nresamplings > 0:
-    #print '\nCalculating uncertainty ...',
+    print ('\nCalculating uncertainty ...')
     ap = []
-    for r in xrange(p.Nresamplings):
-        #print '.',
+    for r in range(p.Nresamplings): 
         stdout.flush()
         evt1 = sample_half_counts(evt, seed=r)
         center = find_core(evt1, 40*kpc2px, 400*kpc2px)
@@ -95,6 +89,6 @@ if p.Nresamplings > 0:
     mid = scoreatpercentile(ap, 50)
     hi  = scoreatpercentile(ap, 84)
 
-    print '\nAphot =', ap0.aphot, '+', (mid-lo)/1.4142, '-', (hi-mid)/1.4142 
+    print ('\nAphot =', ap0.aphot, '+', (mid-lo)/1.4142, '-', (hi-mid)/1.4142 )
 else:
-    print '\nAphot =', ap0.aphot
+    print ('\nAphot =', ap0.aphot)

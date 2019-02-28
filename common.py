@@ -11,9 +11,6 @@
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
-#TODO: DELETE
-#from pylab import *
-
 from numpy import *
 from numpy.fft import rfft2, irfft2, fftshift
 from scipy.integrate import romb
@@ -99,6 +96,7 @@ def conv(im, ker):
     sy,sx = array(ker.shape)/2
     y0,x0 = array(im.shape)/2
     big_ker = zeros(im.shape)
+    sy,sx,y0,x0 = int(sy), int(sx), int(y0), int(x0) 
     big_ker[y0-sy:y0+sy,x0-sx:x0+sx] = ker
     return irfft2(rfft2(im)*rfft2(fftshift(big_ker)))
 
@@ -106,7 +104,6 @@ def conv(im, ker):
 def find_core(evt, sigma, R_search):
     im = ximage(evt, padding=True)
     # Both im and kernel sizes should be even.
-    #a = irfft2(rfft2(im)*rfft2(fftshift(gauss([sigma])[0])))
     a = conv(im, gauss(sigma))
     y, x = indices(a.shape) - evt.d
     #figure(), imshow(a), show()
